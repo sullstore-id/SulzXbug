@@ -1,45 +1,21 @@
-name: Build APK with Buildozer
+name: Build APK with Buildozer (Official)
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Build with Buildozer
+      uses: kivy/buildozer-action@v2
       with:
         python-version: '3.9'
-
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
-        pip install buildozer cython virtualenv
-
-    - name: Build with Buildozer (Dijamin Berhasil)
-      run: |
-        buildozer init
-        
-        # Trik Rahasia: Membuat file konfigurasi untuk mengakali lisensi Android
-        mkdir -p $HOME/.android
-        touch $HOME/.android/repositories.cfg
-        
-        # Memaksa menerima lisensi meskipun AI nya tidak ditampilkan
-        echo "Menerima lisensi Android SDK..."
-        yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-        yes | $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-
-        # Memulai build APK
-        echo "Mulai membangun APK (Proses ini memakan waktu 5-15 menit, harap sabar)..."
-        yes | buildozer android debug
+        args: android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
