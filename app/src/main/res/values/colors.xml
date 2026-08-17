@@ -1,0 +1,8 @@
+<resources>
+    <color name="background_dark">#0B0E14</color>
+    <color name="cyan_neon">#00F5FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray_light">#8A9BB5</color>
+    <color name="button_bg">#1A2530</color>
+    <color name="button_text">#B0C7E7</color>
+</resources>
