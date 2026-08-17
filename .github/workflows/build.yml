@@ -1,4 +1,4 @@
-name: Build APK (Manual Script)
+name: Build APK (Final Fix Libtool)
 
 on:
   push:
@@ -16,14 +16,15 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Buildozer
+    - name: Install dependencies & Fix Libtool
       run: |
         sudo apt update
-        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+        # TAMBAHAN PAKET PENTING DI SINI: libtool autoconf automake
+        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool autoconf automake
         pip install --upgrade pip
         pip install buildozer cython virtualenv
 
-    - name: Setup Android SDK & Accept Licenses (Anti Crash)
+    - name: Setup Android SDK & Accept Licenses
       run: |
         buildozer init
         echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
