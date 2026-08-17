@@ -1,4 +1,4 @@
-name: Build APK with Buildozer (Official)
+name: Build APK (Manual Script)
 
 on:
   push:
@@ -9,13 +9,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Build with Buildozer
-      uses: kivy/buildozer-action@v2
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
-        args: android debug
+        python-version: '3.10'
+
+    - name: Install Buildozer
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+        pip install --upgrade pip
+        pip install buildozer cython virtualenv
+
+    - name: Setup Android SDK & Accept Licenses (Anti Crash)
+      run: |
+        buildozer init
+        echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+    - name: Build APK
+      run: |
+        yes | buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
