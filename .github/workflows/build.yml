@@ -1,4 +1,4 @@
-name: Build APK (Ubuntu 22.04 Stable)
+name: Build APK (Stable Spec)
 
 on:
   push:
@@ -6,9 +6,7 @@ on:
 
 jobs:
   build:
-    # KUNCI PERUBAHAN: Menggunakan Ubuntu 22.04 (Menghindari bug autoconf)
     runs-on: ubuntu-22.04
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,31 +16,22 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install System Dependencies (Ubuntu 22.04)
+    - name: Install Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
+        pip install --upgrade pip
+        pip install cython virtualenv buildozer
 
-    # Cache tetap dipakai agar cepat
+    # Cache menggunakan hash spesifikasi baru Anda
     - name: Cache Android SDK
       uses: actions/cache@v4
       with:
         path: |
           /home/runner/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('**/buildozer.spec') }}
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
         restore-keys: |
           ${{ runner.os }}-buildozer-
-
-    - name: Install Buildozer
-      run: |
-        pip install --upgrade pip
-        pip install cython virtualenv
-        pip install git+https://github.com/kivy/buildozer.git
-
-    - name: Accept Android Licenses
-      run: |
-        buildozer init
-        echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
     - name: Build APK
       run: |
