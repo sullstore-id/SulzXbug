@@ -1,4 +1,4 @@
-name: Build APK (Final Fix Libtool)
+name: Build APK (Fix Ubuntu 24)
 
 on:
   push:
@@ -16,13 +16,17 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install dependencies & Fix Libtool
+    - name: Install System Dependencies
       run: |
         sudo apt update
-        # TAMBAHAN PAKET PENTING DI SINI: libtool autoconf automake
-        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool autoconf automake
+        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool autoconf automake pkg-config
+
+    - name: Install Buildozer from Git (RAHASIA ANTI GAGAL)
+      run: |
         pip install --upgrade pip
-        pip install buildozer cython virtualenv
+        pip install cython virtualenv
+        # Menginstall versi terbaru langsung dari Github untuk Ubuntu 24
+        pip install git+https://github.com/kivy/buildozer.git
 
     - name: Setup Android SDK & Accept Licenses
       run: |
@@ -31,7 +35,8 @@ jobs:
 
     - name: Build APK
       run: |
-        yes | buildozer android debug
+        # "-v" akan menampilkan log lebih detail jika ada error
+        yes | buildozer -v android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
