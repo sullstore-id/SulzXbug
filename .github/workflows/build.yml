@@ -1,4 +1,4 @@
-name: Build APK (Stable Spec)
+name: Build APK (Final NDK 25)
 
 on:
   push:
@@ -22,16 +22,6 @@ jobs:
         sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
         pip install --upgrade pip
         pip install cython virtualenv buildozer
-
-    # Cache menggunakan hash spesifikasi baru Anda
-    - name: Cache Android SDK
-      uses: actions/cache@v4
-      with:
-        path: |
-          /home/runner/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
 
     - name: Build APK
       run: |
