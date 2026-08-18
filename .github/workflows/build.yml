@@ -1,4 +1,4 @@
-name: Build APK (Final Fix Autoconf & Python 3.11)
+name: Build APK (Fix OOM - Single Arch)
 
 on:
   push:
@@ -11,18 +11,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # KUNCI UTAMA PERBAIKAN: Ganti ke Python 3.11
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    - name: Install System Dependencies (Tambahan autoconf-archive)
+    - name: Install System Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
 
-    # Caching tetap penting agar tidak download 2GB lagi
     - name: Cache Android SDK
       uses: actions/cache@v4
       with:
@@ -32,19 +30,17 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildozer-python3.11-
 
-    - name: Install Buildozer from Git
+    - name: Install Buildozer & Upgrade Cython
       run: |
         pip install --upgrade pip
         pip install cython virtualenv
         pip install git+https://github.com/kivy/buildozer.git
 
-    - name: Accept Android Licenses
+    - name: Build APK (Hanya 1 Arsitektur agar tidak crash)
       run: |
         buildozer init
-        echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-    - name: Build APK
-      run: |
+        # Perintah sakti untuk membatasi hanya build 1 jenis arsitektur (menghemat RAM)
+        sed -i 's/android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
         yes | buildozer -v android debug
 
     - name: Upload APK
