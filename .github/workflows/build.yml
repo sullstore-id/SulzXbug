@@ -1,4 +1,4 @@
-name: Build APK (Final NDK 25)
+name: Build APK (Final Stable - Wajib Berhasil)
 
 on:
   push:
@@ -16,12 +16,23 @@ jobs:
       with:
         python-version: '3.11'
 
+    # Bersihkan paksa folder buildozer (agar tidak memakai sisa build Linux yang error)
+    - name: Clean build directory
+      run: |
+        rm -rf /home/runner/.buildozer
+        rm -rf ./buildozer
+
     - name: Install Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
+
+    # KUNCI UTAMA PERBAIKAN: Pakai Buildozer 1.5.0 (Versi Stabil Resmi), BUKAN versi Git
+    - name: Install Buildozer & Dependencies
+      run: |
         pip install --upgrade pip
-        pip install cython virtualenv buildozer
+        pip install cython virtualenv
+        pip install buildozer==1.5.0
 
     - name: Build APK
       run: |
