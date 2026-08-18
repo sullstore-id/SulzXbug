@@ -12,6 +12,6 @@ fullscreen = 0
 # RAHASIA ANTI CRASH DAN ANTI MEMORY LEAK:
 android.archs = arm64-v8a
 android.accept_sdk_license = True
-android.ndk = 23b
+android.ndk = 25b
 android.sdk = 33
 android.minapi = 24
