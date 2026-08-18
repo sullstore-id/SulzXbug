@@ -1,4 +1,4 @@
-name: Build APK (Fix OOM - Single Arch)
+name: Build APK (Final Stable Version)
 
 on:
   push:
@@ -11,36 +11,56 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # Kembali ke Python 3.10 karena Buildozer stabil kompatibel dengannya
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.10'
 
     - name: Install System Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
 
+    # Cache Android SDK tetap penting untuk mencegah download 2GB berulang kali
     - name: Cache Android SDK
       uses: actions/cache@v4
       with:
         path: |
           /home/runner/.buildozer
-        key: ${{ runner.os }}-buildozer-python3.11-${{ hashFiles('**/buildozer.spec') }}
+        key: ${{ runner.os }}-buildozer-final-${{ hashFiles('**/buildozer.spec') }}
         restore-keys: |
-          ${{ runner.os }}-buildozer-python3.11-
+          ${{ runner.os }}-buildozer-final-
 
-    - name: Install Buildozer & Upgrade Cython
+    - name: Install Buildozer STABIL (BUKAN versi git)
       run: |
         pip install --upgrade pip
         pip install cython virtualenv
-        pip install git+https://github.com/kivy/buildozer.git
+        pip install buildozer
 
-    - name: Build APK (Hanya 1 Arsitektur agar tidak crash)
+    # TRIK UTAMA: Kita membuat file spesifikasi manual agar tidak error
+    - name: Create buildozer.spec (Anti Broken Pipe)
       run: |
-        buildozer init
-        # Perintah sakti untuk membatasi hanya build 1 jenis arsitektur (menghemat RAM)
-        sed -i 's/android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
+        cat > buildozer.spec <<EOF
+        [app]
+        title = SulzXbug
+        package.name = sulzxbug
+        package.domain = org.sullstore
+        source.dir = .
+        source.include_exts = py,png,jpg,kv,atlas
+        version = 0.1
+        requirements = python3,kivy
+        orientation = portrait
+        fullscreen = 0
+        android.archs = arm64-v8a
+        android.accept_sdk_license = True
+        android.ndk = 25b
+        android.sdk = 33
+        android.minapi = 24
+        EOF
+
+    - name: Build APK
+      run: |
         yes | buildozer -v android debug
 
     - name: Upload APK
