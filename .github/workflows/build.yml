@@ -1,4 +1,4 @@
-name: Build APK (Fix Ubuntu 24)
+name: Build APK (Final Fix Autoconf & Python 3.11)
 
 on:
   push:
@@ -11,31 +11,40 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # KUNCI UTAMA PERBAIKAN: Ganti ke Python 3.11
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
-    - name: Install System Dependencies
+    - name: Install System Dependencies (Tambahan autoconf-archive)
       run: |
         sudo apt update
-        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool autoconf automake pkg-config
+        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libtool libtool-bin autoconf automake pkg-config autoconf-archive
 
-    - name: Install Buildozer from Git (RAHASIA ANTI GAGAL)
+    # Caching tetap penting agar tidak download 2GB lagi
+    - name: Cache Android SDK
+      uses: actions/cache@v4
+      with:
+        path: |
+          /home/runner/.buildozer
+        key: ${{ runner.os }}-buildozer-python3.11-${{ hashFiles('**/buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-python3.11-
+
+    - name: Install Buildozer from Git
       run: |
         pip install --upgrade pip
         pip install cython virtualenv
-        # Menginstall versi terbaru langsung dari Github untuk Ubuntu 24
         pip install git+https://github.com/kivy/buildozer.git
 
-    - name: Setup Android SDK & Accept Licenses
+    - name: Accept Android Licenses
       run: |
         buildozer init
         echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
     - name: Build APK
       run: |
-        # "-v" akan menampilkan log lebih detail jika ada error
         yes | buildozer -v android debug
 
     - name: Upload APK
